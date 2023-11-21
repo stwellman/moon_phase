@@ -6,68 +6,71 @@
 //https://github.com/andviane/moon.git
 
 import 'dart:math';
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
+
 import 'moon_phase.dart';
-import 'moon_widget.dart';
 
 class MoonPainter extends CustomPainter {
   MoonWidget moonWidget;
+  ui.Image? moonImage;
   final Paint paintDark = Paint();
   final Paint paintLight = Paint();
   final MoonPhase moon = MoonPhase();
 
-  MoonPainter({required this.moonWidget});
+  MoonPainter({required this.moonWidget, this.moonImage});
 
   @override
   void paint(Canvas canvas, Size size) {
     double radius = moonWidget.resolution;
+    double negRadius = radius * -1;
 
     int width = radius.toInt() * 2;
     int height = radius.toInt() * 2;
     double phaseAngle = moon.getPhaseAngle(moonWidget.date);
 
-    double xcenter = 0;
-    double ycenter = 0;
+    double xCenter = 0;
+    double yCenter = 0;
 
-    try {
-      paintLight.color = moonWidget.moonColor;
-      //달의 색깔로 전체 원을 그린다
+    paintLight.color = moonWidget.surfaceColor;
+    if (moonImage != null) {
+      try {
+        canvas.drawImage(moonImage!, Offset(negRadius, negRadius + 1), Paint());
+      } catch (e) {
+        canvas.drawCircle(const Offset(0, 1), radius, paintLight);
+      }
+    } else {
       canvas.drawCircle(const Offset(0, 1), radius, paintLight);
-    } catch (e) {
-      radius = min(width, height) * 0.4;
-      paintLight.color = moonWidget.moonColor;
-      Rect oval = Rect.fromLTRB(xcenter - radius, ycenter - radius,
-          xcenter + radius, ycenter + radius);
-      canvas.drawOval(oval, paintLight);
     }
 
-    ///위상각은 태양 - 달 - 지구의 각도다.
-    ///따라서 0 = full phase, 180 = new
-    ///우리가 필요한 것은 일출 터미네이터의 위치 각도(태양 - 지구 - 달)다.
-    ///위상각과 반대 방향이기 때문에 변환해야한다.
+    ///The phase angle is the angle between the sun - the moon - the earth.
+    ///So 0 = full phase, 180 = new
+    ///What we need is the position angle of the sunrise terminator (Sun - Earth - Moon).
+    ///It must be converted because it is in the opposite direction to the phase angle.
     double positionAngle = pi - phaseAngle;
     if (positionAngle < 0.0) {
       positionAngle += 2.0 * pi;
     }
 
-    //이제 어두운 면을 그려야 한다.
-    paintDark.color = moonWidget.earthshineColor;
+    //Now we need to draw the dark side.
+    paintDark.color = moonWidget.shadowColor;
 
     double cosTerm = cos(positionAngle);
 
-    double rsquared = radius * radius;
+    double rSquared = radius * radius;
     double whichQuarter = ((positionAngle * 2.0 / pi) + 4) % 4;
 
     for (int j = 0; j < radius; ++j) {
-      double rrf = sqrt(rsquared - j * j);
+      double rrf = sqrt(rSquared - j * j);
       double rr = rrf;
       double xx = rrf * cosTerm;
-      double x1 = xcenter - (whichQuarter < 2 ? rr : xx);
+      double x1 = xCenter - (whichQuarter < 2 ? rr : xx);
       double w = rr + xx;
       canvas.drawRect(
-          Rect.fromLTRB(x1, ycenter - j, w + x1, ycenter - j + 2), paintDark);
+          Rect.fromLTRB(x1, yCenter - j, w + x1, yCenter - j + 2), paintDark);
       canvas.drawRect(
-          Rect.fromLTRB(x1, ycenter + j, w + x1, ycenter + j + 2), paintDark);
+          Rect.fromLTRB(x1, yCenter + j, w + x1, yCenter + j + 2), paintDark);
     }
   }
 
