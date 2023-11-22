@@ -23,25 +23,24 @@ class MoonPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    double radius = moonWidget.resolution;
+    double radius = moonWidget.size / 2;
     double negRadius = radius * -1;
 
-    int width = radius.toInt() * 2;
-    int height = radius.toInt() * 2;
     double phaseAngle = moon.getPhaseAngle(moonWidget.date);
 
-    double xCenter = 0;
-    double yCenter = 0;
+    double xCenter = radius;
+    double yCenter = radius;
 
     paintLight.color = moonWidget.surfaceColor;
     if (moonImage != null) {
-      try {
-        canvas.drawImage(moonImage!, Offset(negRadius, negRadius + 1), Paint());
-      } catch (e) {
-        canvas.drawCircle(const Offset(0, 1), radius, paintLight);
-      }
+      //try {
+      canvas.drawImage(moonImage!, const Offset(0, 1), Paint());
+      // } catch (e) {
+      //   print(e);
+      //   canvas.drawCircle(Offset(radius, radius + 1), radius, paintLight);
+      // }
     } else {
-      canvas.drawCircle(const Offset(0, 1), radius, paintLight);
+      canvas.drawCircle(Offset(radius, radius + 1), radius, paintLight);
     }
 
     ///The phase angle is the angle between the sun - the moon - the earth.
@@ -68,9 +67,12 @@ class MoonPainter extends CustomPainter {
       double x1 = xCenter - (whichQuarter < 2 ? rr : xx);
       double w = rr + xx;
       canvas.drawRect(
-          Rect.fromLTRB(x1, yCenter - j, w + x1, yCenter - j + 2), paintDark);
+          Rect.fromLTRB(x1, yCenter - j, w + x1, yCenter - j + 1), paintDark);
+      //if (j > 0) {
       canvas.drawRect(
-          Rect.fromLTRB(x1, yCenter + j, w + x1, yCenter + j + 2), paintDark);
+          Rect.fromLTRB(x1, yCenter + j + 1, w + x1, yCenter + j + 2),
+          paintDark);
+      //}
     }
   }
 

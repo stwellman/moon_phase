@@ -45,9 +45,8 @@ class _MyAppState extends State<MyApp> {
     for (int i = 0; i < 30 * (24 / 12); i++) {
       _list.add(
         MoonWidget(
-          context: context,
           date: DateTime(2021, 10, 6, 5).add(Duration(hours: i * 12)),
-          resolution: 64,
+          //resolution: 64,
           size: 48,
           surfaceColor: Colors.amber,
           shadowColor: Colors.blueGrey.shade900,
